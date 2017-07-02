@@ -8,6 +8,8 @@ class BlockChain
 public:
     BlockChain();
 
+
+
 private:
     struct Impl;
     QScopedPointer<Impl> d;

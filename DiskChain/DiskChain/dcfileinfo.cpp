@@ -45,9 +45,9 @@ DcFileInfo::~DcFileInfo()
 }
 
 // search info
-void DcFileInfo::SearchInfo()
+void DcFileInfo::SearchInfo(QString name)
 {
-
+    // unimplemented
 }
 
 // from local disk to DiskChain network
@@ -136,12 +136,14 @@ void DcFileInfo::Impl::resv(const QString& sdir, QString hash)
 {
     QDir dir(defPath);
     qDebug() << "hash " << hash;
+    qDebug() << "sdir " << sdir;
     foreach (QFileInfo info, dir.entryInfoList(QStringList() << "*"+hash+"*")) {
         qDebug() << "inside ";
         if (info.suffix() == "txt"){
             qDebug() << "resv " << info.absoluteFilePath();
             DcFileInfo dci = readDci(info);
             QFile::copy(defPath + hash + ".dat", dci.name);
+            qDebug() << "copied " << defPath + hash + ".dat" << " => " << dci.name;
         }
     }
 }

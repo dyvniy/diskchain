@@ -31,3 +31,9 @@ HEADERS  += mainwindow.h \
 FORMS    += mainwindow.ui
 
 RESOURCES += icons.qrc
+
+DISTFILES += \
+    proxy.qml \
+    eth.js \
+    struct.sol \
+    README.txt

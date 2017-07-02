@@ -4,7 +4,9 @@
 #include <windows.h>
 using namespace std;
 #include <QApplication>
+#include <QStyleFactory>
 #include <iostream>
+
 
 
 int main(int argc, char *argv[])
@@ -19,6 +21,7 @@ int main(int argc, char *argv[])
     qWarning() << "Мой текст";
 
     QApplication a(argc, argv);
+    QApplication::setStyle(QStyleFactory::create("windowsvista"));
     MainWindow w;
     w.show();
 

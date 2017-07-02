@@ -7,9 +7,6 @@
 #include <QStandardItem>
 #include <QTreeWidgetItem>
 
-const QString rootDir("../work/code/mainbugabr-114334");
-//const QString rootPath("H:/prog/_myProg/work/acronis/work/code/mainbugabr-114334");
-const QString rootPath("C:/work/code/mainlearn");
 
 QDebug operator<<(QDebug debug, const QFileInfo infos)
 {
@@ -36,9 +33,6 @@ struct MainWindow::Impl
     QString dcCurFileName;
 
     void setup(QWidget *parent0, MainWindow* wnd0, Ui::MainWindow* ui0);
-
-    //QFileInfoList loadFiles(const QString &startDir, QStringList filters);
-    //void showFileInTree(QString fileName);
 
     QStringList onSelectChanged(const QModelIndex& index);
     QStringList onDcSelectChanged(const QModelIndex& index);
@@ -70,30 +64,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->toDcButton, &QPushButton::clicked, [&](){
         d->toDiskChain();
-        //msg("toDC");
     });
     connect(ui->toLocalButton, &QPushButton::clicked, [&](){
         d->toLocal();
-        //msg("toLocal");
     });
-    /*
-    QAction* act;
-    act = new QAction(QIcon(":/icons/build.png"), tr("build"), this);
-    ui->mainToolBar->addAction(act);
-    connect(act, &QAction::triggered, [&](){
-        qDebug() << QDir(rootDir).entryList(QStringList("*.*"));
-        //ui->treeView->setModel(nullptr);
-        //auto list = d->loadFiles(rootDir, QStringList("*.txt"));
-        //qDebug() << list.count();
-        msg("build");
-    });
-    */
     ui->treeView->setModel(d->model);
-    if (!rootPath.isEmpty()) {
-        const QModelIndex rootIndex = d->model->index(QDir::cleanPath(rootPath));
-        if (rootIndex.isValid())
-            ui->treeView->setRootIndex(rootIndex);
-    }
     ui->treeView->setColumnWidth(0, 200);
     // double click
     connect(ui->treeView, &QTreeView::activated, [&](const QModelIndex& index){
@@ -130,7 +105,7 @@ void MainWindow::Impl::setup(QWidget *parent0, MainWindow *wnd0, Ui::MainWindow 
     ui = ui0;
 
     model = new QFileSystemModel(parent);
-    model->setRootPath(rootPath);
+    model->setRootPath("/");
     proxy = new QSortFilterProxyModel(parent);
     fileModel = new QStandardItemModel(parent);
     dcModel = new QStandardItemModel(parent);
@@ -139,56 +114,7 @@ void MainWindow::Impl::setup(QWidget *parent0, MainWindow *wnd0, Ui::MainWindow 
     dci.Init(dcModel);
     ui->treeViewDc->setModel(dcModel);
 }
-/*
-QFileInfoList MainWindow::Impl::loadFiles(const QString &startDir, QStringList filters)
-{
-    QDir dir(startDir);
-    QFileInfoList list;
 
-    foreach (QString file, dir.entryList(filters, QDir::Files))
-    {
-        auto info = QFileInfo(startDir + "/" + file);
-        list += info;
-    }
-
-    foreach (QString subdir, dir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot))
-        list += loadFiles(startDir + "/" + subdir, filters);
-    return list;
-
-}
-
-void MainWindow::Impl::showFileInTree(QString fileName)
-{
-    QFile file(fileName);
-    if (!file.open(QFile::ReadOnly))
-        return;
-    QTextStream ts(&file);//, QIODevice::ReadOnly);
-    QString line;
-    ui->treeViewDc->setModel(nullptr);
-    fileModel->clear();
-    //qDebug() << "before";
-    QStandardItem* parentItem = new QStandardItem("");
-    fileModel->appendRow(parentItem);
-    QStandardItem* item = nullptr;
-    while (!ts.atEnd())
-    {
-        line = ts.readLine();
-        int iOpen = line.count('{');
-        int iClose = line.count('}');
-        if (iOpen < iClose)
-            if (parentItem->parent() != fileModel->itemPrototype())
-                parentItem = parentItem->parent();
-        item = new QStandardItem(line);
-        item->setEditable(false);
-        parentItem->appendRow(item);
-        if (iOpen > iClose)
-            parentItem = item;
-    }
-    //qDebug() << "after";
-    ui->treeViewDc->setModel(fileModel);
-    ui->treeViewDc->expandAll();
-}
-*/
 QStringList MainWindow::Impl::onSelectChanged(const QModelIndex &index)
 {
     QModelIndexList list = ui->treeView->selectionModel()->selectedIndexes();
@@ -242,7 +168,11 @@ void MainWindow::Impl::toDiskChain()
     auto item = new QStandardItem(fileName);
     item->setEditable(false);
     DcFileInfo dci;
-    dci.Send(curFileInfo, dcModel);
+    if (dci.Send(curFileInfo, dcModel))
+    {
+        QDir dir(fileName);
+        dir.remove(fileName);
+    }
     ui->treeViewDc->setModel(dcModel);
 }
 
